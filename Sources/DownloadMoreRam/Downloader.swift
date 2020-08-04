@@ -38,7 +38,8 @@ struct Downloader {
         do {
             let converterResult = try self.resourceConverter.convert(resource: resource)
             converterResult.externalResourceUrls.forEach({ download(url: $0, saveTo: outputUrl, urlHistory: urlHistory) })
-            let filePathUrl = URL(fileURLWithPath: converterResult.updatedResource.relativeFilePath, isDirectory: false, relativeTo: outputUrl)
+            let relativePath = LinkBuilder.getRelativePath(from: converterResult.updatedResource.url, mimeType: converterResult.updatedResource.mimeType)
+            let filePathUrl = URL(fileURLWithPath: relativePath, isDirectory: false, relativeTo: outputUrl)
             do {
                 print("Saving \(resource.url) to \(filePathUrl)")
                 try computer.save(file: converterResult.updatedResource.data, at: filePathUrl)

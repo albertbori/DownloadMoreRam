@@ -12,22 +12,6 @@ struct Resource {
     var mimeType: MimeType
     var data: Data
     
-    var relativeFilePath: String {
-        let folder: String
-        switch mimeType {
-        case .html:
-            folder = "pages"
-        case .css, .js:
-            folder = "scripts"
-        case .png, .gif, .tiff, .svg, .jpg:
-            folder = "images"
-        default:
-            folder = "resources"
-        }
-        let pathExtension = url.pathExtension != "" ? url.pathExtension : "\(mimeType)"
-        return "\(folder)/\(url.lastPathComponent)/\(pathExtension)"
-    }
-    
     init(url: URL, mimeType rawMimeType: String, data: Data) throws {
         guard let mimeType = MimeType(rawValue: rawMimeType) else {
             throw ResourceError.unrecognized(mimeType: rawMimeType)
@@ -42,7 +26,7 @@ enum ResourceError: Error {
     case unrecognized(mimeType: String)
 }
 
-enum MimeType: String {
+enum MimeType: String, CaseIterable {
     case
     aac = "audio/aac",
     abw = "application/x-abiword",
@@ -113,5 +97,32 @@ enum MimeType: String {
     zip = "application/zip",
     threegp = "video/3gpp",
     video3g2 = "video/3gpp2",
-    video7z = "application/x-7z-compressed"
+    video7z = "application/x-7z-compressed",
+    unknown = "unknown"
+    
+    init?(htmlElement elementName: String, orUrl url: URL) {
+        switch elementName {
+        case "a":
+            self = .html
+        case "link[rel=stylesheet]":
+            self = .css
+        case "script":
+            self = .js
+        case "img":
+            self.init(from: url)
+        default:
+            self = .unknown
+        }
+    }
+    
+    init?(from url: URL) {
+        var lookup = Dictionary(grouping: MimeType.allCases, by: { "\($0)" })
+        lookup["jpeg"] = [.jpg]
+        lookup["tif"] = [.tiff]
+        guard let value = lookup[url.pathExtension]?.first else {
+            self = .unknown
+            return
+        }
+        self = value
+    }
 }
