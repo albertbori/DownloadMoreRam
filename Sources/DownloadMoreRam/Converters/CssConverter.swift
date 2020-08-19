@@ -16,13 +16,13 @@ class CssConverter {
     }
     
     func convert() throws -> Converter.ConvertedResult {
-        guard let css = String(bytes: resource.data, encoding: .utf8) else {
-            throw HtmlConverterError.invalidData
+        guard let css = String(bytes: resource.data, encoding: resource.encoding) else {
+            throw CssConverterError.invalidData
         }
         
         var outputCss = css as NSString
         let regex = try NSRegularExpression(pattern: "url\\([\"']?([^\\)\"']+)[\"']?\\)", options: [.caseInsensitive]) //pattern: url\(["']?([^\)"']+)["']?\)
-        let totalRange = NSRange(location: 0, length: css.utf8.count)
+        let totalRange = NSRange(location: 0, length: css.count)
         let matches = regex.matches(in: css, options: [], range: totalRange)
         let reversedMatches = matches.sorted(by: { l, r in l.range.location > r.range.location })
         for match in reversedMatches {
@@ -35,7 +35,7 @@ class CssConverter {
         }
         
         var updatedResource = resource
-        guard let data = (outputCss as String).data(using: .utf8) else {
+        guard let data = (outputCss as String).data(using: resource.encoding) else {
             throw CssConverterError.badCssOutput
         }
         updatedResource.data = data

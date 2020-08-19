@@ -7,19 +7,25 @@
 
 import Foundation
 
-struct Downloader {
+public class Downloader {
     let internet = Internet()
     let computer = Computer()
     let resourceConverter = Converter()
+    var counter = ThreadSafeCounter()
     
     init() { }
     
-    func download(website url: URL, saveTo outputUrl: URL) {
-        download(url: url, saveTo: outputUrl, urlHistory: SafeSet<URL>())
+    public func download(website url: URL, saveTo outputUrl: URL) {
+        counter = ThreadSafeCounter()
+        download(url: url, saveTo: outputUrl, urlHistory: ThreadSafeSet<URL>())
+        while counter.count != 0 {
+            Thread.sleep(forTimeInterval: 100)
+        }
     }
     
-    private func download(url: URL, saveTo outputUrl: URL, urlHistory: SafeSet<URL>) {
+    private func download(url: URL, saveTo outputUrl: URL, urlHistory: ThreadSafeSet<URL>) {
         guard !urlHistory.safeSet.contains(url) else { return }
+        counter.count += 1
         urlHistory.safeSet.insert(url)
         print("Downloading \(url)")
         internet.getResource(for: url, completion: { result in
@@ -30,10 +36,11 @@ struct Downloader {
                 print("Downloaded \(url)")
                 self.convert(resource: resource, saveTo: outputUrl, urlHistory: urlHistory)
             }
+            self.counter.count -= 1
         })
     }
     
-    private func convert(resource: Resource, saveTo outputUrl: URL, urlHistory: SafeSet<URL>) {
+    private func convert(resource: Resource, saveTo outputUrl: URL, urlHistory: ThreadSafeSet<URL>) {
         print("Converting \(resource.url)")
         do {
             let converterResult = try self.resourceConverter.convert(resource: resource)

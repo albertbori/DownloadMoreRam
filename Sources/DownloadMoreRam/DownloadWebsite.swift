@@ -7,7 +7,6 @@
 
 import Foundation
 import ArgumentParser
-import SwiftSoup
 
 struct DownloadWebsite: ParsableCommand {
     @Argument(help: "The url of the website to be downloaded.")
@@ -17,11 +16,11 @@ struct DownloadWebsite: ParsableCommand {
     
     func validate() throws {
         guard let _ = URL(string: websiteUrl) else {
-            throw ValidationError("Invalid website url.")
+            throw ValidationError("Invalid website url at: \(websiteUrl)")
         }
         let pathUrl = URL(fileURLWithPath: outputPath)
         guard FileManager.default.fileExists(atPath: pathUrl.path, isDirectory: nil) else {
-            throw ValidationError("Invalid output path: Does not exist.")
+            throw ValidationError("Invalid output path: Does not exist at: \(pathUrl.path)")
         }
     }
     

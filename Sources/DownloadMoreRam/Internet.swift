@@ -26,8 +26,9 @@ struct Internet {
                 result = .failure(RequestError.noMimeType)
                 return
             }
+            let encoding = response?.textEncodingName ?? "utf-8"
             do {
-                let resource = try Resource(url: url, mimeType: mimeType, data: data)
+                let resource = try Resource(url: url, encoding: encoding, mimeType: mimeType, data: data)
                 result = .success(resource)
             } catch {
                 result = .failure(error)
@@ -40,5 +41,6 @@ struct Internet {
         case unknown
         case noData
         case noMimeType
+        case noEncoding
     }
 }

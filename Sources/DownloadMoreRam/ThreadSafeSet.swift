@@ -7,7 +7,7 @@
 
 import Foundation
 
-class SafeSet<T> where T: Hashable {
+class ThreadSafeSet<T> where T: Hashable {
     private let lock = DispatchQueue(label: "SafeSet\(UUID())")
     private var set = Set<T>()
     var safeSet: Set<T> {

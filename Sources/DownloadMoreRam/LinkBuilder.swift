@@ -20,7 +20,11 @@ struct LinkBuilder {
         default:
             folder = "resources"
         }
-        let pathExtension = url.pathExtension != "" ? url.pathExtension : "\(mimeType)"
-        return "\(folder)/\(url.lastPathComponent)/\(pathExtension)"
+        //TODO: to prevent accidental overriding resources from different paths and urls, the entire path needs to be included in each file name to guarantee uniqueness
+        if url.pathExtension == "" {
+            let fileName = url.lastPathComponent.trimmingCharacters(in: ["/"]) != "" ? url.lastPathComponent : "index"
+            return "\(folder)/\(fileName).\(mimeType)"
+        }
+        return "\(folder)/\(url.lastPathComponent)"
     }
 }

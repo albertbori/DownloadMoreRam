@@ -17,7 +17,7 @@ class HtmlConverter {
     }
     
     func convert() throws -> Converter.ConvertedResult {
-        guard let html = String(bytes: resource.data, encoding: .utf8) else {
+        guard let html = String(bytes: resource.data, encoding: resource.encoding) else {
             throw HtmlConverterError.invalidData
         }
         
@@ -28,7 +28,7 @@ class HtmlConverter {
         try convert(doc: doc, elementName: "img", attributeName: "src")
         
         var updatedResource = resource
-        guard let data = try doc.outerHtml().data(using: .utf8) else {
+        guard let data = try doc.outerHtml().data(using: resource.encoding) else {
             throw HtmlConverterError.badHtmlOutput
         }
         updatedResource.data = data

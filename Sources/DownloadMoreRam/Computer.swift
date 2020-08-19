@@ -8,7 +8,12 @@
 import Foundation
 
 struct Computer {
-    func save(file: Data, at path: URL) throws {
-        try file.write(to: path)
+    func save(file: Data, at pathUrl: URL) throws {
+        try file.write(to: pathUrl, options: .atomic)
     }
+}
+
+enum ComputerError: Error {
+    case fileAlreadyExists(atPath: String)
+    case failedToCreateFile
 }

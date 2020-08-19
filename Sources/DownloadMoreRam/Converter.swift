@@ -9,28 +9,18 @@ import Foundation
 
 struct Converter {
     func convert(resource: Resource) throws -> ConvertedResult {
+        let convert: () throws -> ConvertedResult
         switch resource.mimeType {
         case .html:
-            let converter = HtmlConverter(resource: resource)
-            return try converter.convert()
+            convert = HtmlConverter(resource: resource).convert
         case .css:
-            let converter = CssConverter(resource: resource)
-            return try converter.convert()
+            convert = CssConverter(resource: resource).convert
         case .js:
-            return convertJavascript(resource: resource)
+            convert = JavascriptConverter(resource: resource).convert
         default:
             return ConvertedResult(externalResourceUrls: [], updatedResource: resource)
         }
-    }
-    
-    private func convertCss(resource: Resource) -> ConvertedResult {
-        //TODO: extract urls, replacing them with relative urls
-        return ConvertedResult(externalResourceUrls: [], updatedResource: try! Resource(url: URL(string: "")!, mimeType: "", data: Data()))
-    }
-    
-    private func convertJavascript(resource: Resource) -> ConvertedResult {
-        //TODO: extract urls, replacing them with relative urls
-        return ConvertedResult(externalResourceUrls: [], updatedResource: try! Resource(url: URL(string: "")!, mimeType: "", data: Data()))
+        return try convert()
     }
 
     struct ConvertedResult {

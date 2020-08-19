@@ -9,14 +9,19 @@ import Foundation
 
 struct Resource {
     var url: URL
+    var encoding: String.Encoding
     var mimeType: MimeType
     var data: Data
     
-    init(url: URL, mimeType rawMimeType: String, data: Data) throws {
+    init(url: URL, encoding rawEncoding: String, mimeType rawMimeType: String, data: Data) throws {
+        guard let encoding = String.Encoding(rawValue: rawEncoding) else {
+            throw ResourceError.unrecognized(mimeType: rawEncoding)
+        }
         guard let mimeType = MimeType(rawValue: rawMimeType) else {
             throw ResourceError.unrecognized(mimeType: rawMimeType)
         }
         self.url = url
+        self.encoding = encoding
         self.mimeType = mimeType
         self.data = data
     }
@@ -24,81 +29,97 @@ struct Resource {
 
 enum ResourceError: Error {
     case unrecognized(mimeType: String)
+    case unrecognized(encoding: String)
 }
 
-enum MimeType: String, CaseIterable {
-    case
-    aac = "audio/aac",
-    abw = "application/x-abiword",
-    arc = "application/x-freearc",
-    avi = "video/x-msvideo",
-    azw = "application/vnd.amazon.ebook",
-    bin = "application/octet-stream",
-    bmp = "image/bmp",
-    bz = "application/x-bzip",
-    bz2 = "application/x-bzip2",
-    csh = "application/x-csh",
-    css = "text/css",
-    csv = "text/csv",
-    doc = "application/msword",
-    docx = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    eot = "application/vnd.ms-fontobject",
-    epub = "application/epub+zip",
-    gz = "application/gzip",
-    gif = "image/gif",
-    html = "text/html",
-    ico = "image/vnd.microsoft.icon",
-    ics = "text/calendar",
-    jar = "application/java-archive",
-    jpg = "image/jpeg",
-    js = "text/javascript",
-    json = "application/json",
-    jsonld = "application/ld+json",
-    midi = "audio/midi audio/x-midi",
-    mp3 = "audio/mpeg",
-    mpeg = "video/mpeg",
-    mpkg = "application/vnd.apple.installer+xml",
-    odp = "application/vnd.oasis.opendocument.presentation",
-    ods = "application/vnd.oasis.opendocument.spreadsheet",
-    odt = "application/vnd.oasis.opendocument.text",
-    oga = "audio/ogg",
-    ogv = "video/ogg",
-    ogx = "application/ogg",
-    opus = "audio/opus",
-    otf = "font/otf",
-    png = "image/png",
-    pdf = "application/pdf",
-    php = "application/x-httpd-php",
-    ppt = "application/vnd.ms-powerpoint",
-    pptx = "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    rar = "application/vnd.rar",
-    rtf = "application/rtf",
-    sh = "application/x-sh",
-    svg = "image/svg+xml",
-    swf = "application/x-shockwave-flash",
-    tar = "application/x-tar",
-    tiff = "image/tiff",
-    ts = "video/mp2t",
-    ttf = "font/ttf",
-    txt = "text/plain",
-    vsd = "application/vnd.visio",
-    wav = "audio/wav",
-    weba = "audio/webm",
-    webm = "video/webm",
-    webp = "image/webp",
-    woff = "font/woff",
-    woff2 = "font/woff2",
-    xhtml = "application/xhtml+xml",
-    xls = "application/vnd.ms-excel",
-    xlsx = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    xml = "application/xml",
-    textXML = "text/xml",
-    xul = "application/vnd.mozilla.xul+xml",
-    zip = "application/zip",
-    threegp = "video/3gpp",
-    video3g2 = "video/3gpp2",
-    video7z = "application/x-7z-compressed",
-    unknown = "unknown"
+extension String.Encoding {
+    init?(rawValue: String) {
+        switch rawValue {
+        case "utf-8": self = .utf8
+        case "utf-16": self = .utf16
+        default: return nil
+        }
+    }
+}
+
+enum MimeType: CaseIterable {
+    case aac, abw, arc, avi, azw, bin, bmp, bz, bz2, csh, css, csv, doc, docx, eot, epub, gz, gif, html, ico, ics, jar, jpg, js, json, jsonld, midi, mp3, mpeg, mpkg, odp, ods, odt, oga, ogv, ogx, opus, otf, png, pdf, php, ppt, pptx, rar, rtf, sh, svg, swf, tar, tiff, ts, ttf, txt, vsd, wav, weba, webm, webp, woff, woff2, xhtml, xls, xlsx, xml, textXML, xul, zip, threegp, video3g2, video7z, unknown
+    
+    init?(rawValue: String) {
+        switch rawValue {
+        case "audio/aac": self = .aac
+        case "application/x-abiword": self = .abw
+        case "application/x-freearc": self = .arc
+        case "video/x-msvideo": self = .avi
+        case "application/vnd.amazon.ebook": self = .azw
+        case "application/octet-stream": self = .bin
+        case "image/bmp": self = .bmp
+        case "application/x-bzip": self = .bz
+        case "application/x-bzip2": self = .bz2
+        case "application/x-csh": self = .csh
+        case "text/css": self = .css
+        case "text/csv": self = .csv
+        case "application/msword": self = .doc
+        case "application/vnd.openxmlformats-officedocument.wordprocessingml.document": self = .docx
+        case "application/vnd.ms-fontobject": self = .eot
+        case "application/epub+zip": self = .epub
+        case "application/gzip": self = .gz
+        case "image/gif": self = .gif
+        case "text/html": self = .html
+        case "image/vnd.microsoft.icon": self = .ico
+        case "text/calendar": self = .ics
+        case "application/java-archive": self = .jar
+        case "image/jpeg": self = .jpg
+        case "text/javascript", "application/javascript": self = .js
+        case "application/json": self = .json
+        case "application/ld+json": self = .jsonld
+        case "audio/midi audio/x-midi": self = .midi
+        case "audio/mpeg": self = .mp3
+        case "video/mpeg": self = .mpeg
+        case "application/vnd.apple.installer+xml": self = .mpkg
+        case "application/vnd.oasis.opendocument.presentation": self = .odp
+        case "application/vnd.oasis.opendocument.spreadsheet": self = .ods
+        case "application/vnd.oasis.opendocument.text": self = .odt
+        case "audio/ogg": self = .oga
+        case "video/ogg": self = .ogv
+        case "application/ogg": self = .ogx
+        case "audio/opus": self = .opus
+        case "font/otf": self = .otf
+        case "image/png": self = .png
+        case "application/pdf": self = .pdf
+        case "application/x-httpd-php": self = .php
+        case "application/vnd.ms-powerpoint": self = .ppt
+        case "application/vnd.openxmlformats-officedocument.presentationml.presentation": self = .pptx
+        case "application/vnd.rar": self = .rar
+        case "application/rtf": self = .rtf
+        case "application/x-sh": self = .sh
+        case "image/svg+xml": self = .svg
+        case "application/x-shockwave-flash": self = .swf
+        case "application/x-tar": self = .tar
+        case "image/tiff": self = .tiff
+        case "video/mp2t": self = .ts
+        case "font/ttf": self = .ttf
+        case "text/plain": self = .txt
+        case "application/vnd.visio": self = .vsd
+        case "audio/wav": self = .wav
+        case "audio/webm": self = .weba
+        case "video/webm": self = .webm
+        case "image/webp": self = .webp
+        case "font/woff": self = .woff
+        case "font/woff2": self = .woff2
+        case "application/xhtml+xml": self = .xhtml
+        case "application/vnd.ms-excel": self = .xls
+        case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": self = .xlsx
+        case "application/xml": self = .xml
+        case "text/xml": self = .textXML
+        case "application/vnd.mozilla.xul+xml": self = .xul
+        case "application/zip": self = .zip
+        case "video/3gpp": self = .threegp
+        case "video/3gpp2": self = .video3g2
+        case "application/x-7z-compressed": self = .video7z
+        default: self = .unknown
+        }
+    }
     
     init?(htmlElement elementName: String, orUrl url: URL) {
         switch elementName {
