@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  ThreadSafeSet.swift
 //  
 //
 //  Created by Albert Bori on 8/3/20.

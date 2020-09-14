@@ -1,11 +1,12 @@
 //
-//  File.swift
+//  Resource.swift
 //  
 //
 //  Created by Albert Bori on 8/2/20.
 //
 
 import Foundation
+import SwiftSoup
 
 struct Resource {
     var url: URL
@@ -17,7 +18,7 @@ struct Resource {
         guard let encoding = String.Encoding(rawValue: rawEncoding) else {
             throw ResourceError.unrecognized(mimeType: rawEncoding)
         }
-        guard let mimeType = MimeType(rawValue: rawMimeType) else {
+        guard let mimeType = MimeType(rawValue: rawMimeType) ?? MimeType(url: url) else {
             throw ResourceError.unrecognized(mimeType: rawMimeType)
         }
         self.url = url
@@ -117,32 +118,36 @@ enum MimeType: CaseIterable {
         case "video/3gpp": self = .threegp
         case "video/3gpp2": self = .video3g2
         case "application/x-7z-compressed": self = .video7z
-        default: self = .unknown
+        case "image/x-icon": self = .ico
+        default: return nil
         }
     }
     
-    init?(htmlElement elementName: String, orUrl url: URL) {
-        switch elementName {
-        case "a":
-            self = .html
-        case "link[rel=stylesheet]":
-            self = .css
-        case "script":
-            self = .js
-        case "img":
-            self.init(from: url)
-        default:
-            self = .unknown
+    init?(element: Element) throws {
+        let cssQueryMap: [String: MimeType] = [
+            "a": .html,
+            "link[rel=stylesheet]": .css,
+            "link[rel=preload][as=style]": .css,
+            "link[rel=preload][as=fetch]": .json,
+            "link[rel=preload][as=image]": .png,
+            "link[rel=preload][as=script]": .js,
+            "script": .js,
+        ]
+        guard let key = try cssQueryMap.keys.first(where: { try element.iS($0) }) else {
+            return nil
         }
+        guard let type = cssQueryMap[key] else {
+            return nil
+        }
+        self = type
     }
     
-    init?(from url: URL) {
+    init?(url: URL) {
         var lookup = Dictionary(grouping: MimeType.allCases, by: { "\($0)" })
         lookup["jpeg"] = [.jpg]
         lookup["tif"] = [.tiff]
         guard let value = lookup[url.pathExtension]?.first else {
-            self = .unknown
-            return
+            return nil
         }
         self = value
     }

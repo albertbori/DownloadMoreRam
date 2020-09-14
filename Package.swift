@@ -21,6 +21,12 @@ let package = Package(
             name: "DownloadMoreRam",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                "DownloadMoreRamCore",
+                "SwiftSoup"
+            ]),
+        .target(
+            name: "DownloadMoreRamCore",
+            dependencies: [
                 "SwiftSoup"
             ]),
         .testTarget(

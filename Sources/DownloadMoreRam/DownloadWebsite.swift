@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  DownloadWebsite.swift
 //  
 //
 //  Created by Albert Bori on 7/28/20.
@@ -7,6 +7,7 @@
 
 import Foundation
 import ArgumentParser
+import DownloadMoreRamCore
 
 struct DownloadWebsite: ParsableCommand {
     @Argument(help: "The url of the website to be downloaded.")
@@ -37,6 +38,10 @@ struct DownloadWebsite: ParsableCommand {
         print("Website Url: \(url.absoluteString)")
         print("Output Path: \(pathUrl.path)")
         let downloader = Downloader()
-        downloader.download(website: url, saveTo: pathUrl)
+        var saveToPath = pathUrl
+        if let host = url.host {
+            saveToPath = pathUrl.appendingPathComponent(host, isDirectory: true)
+        }
+        downloader.download(website: url, saveTo: saveToPath)
     }
 }

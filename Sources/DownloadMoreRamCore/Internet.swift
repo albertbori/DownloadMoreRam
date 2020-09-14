@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Internet.swift
 //  
 //
 //  Created by Albert Bori on 8/2/20.

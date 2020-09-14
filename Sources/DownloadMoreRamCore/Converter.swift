@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Converter.swift
 //  
 //
 //  Created by Albert Bori on 8/2/20.
