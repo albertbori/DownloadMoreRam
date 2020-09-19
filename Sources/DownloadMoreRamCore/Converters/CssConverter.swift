@@ -44,6 +44,7 @@ class CssConverter {
             guard let possibleMimeType = MimeType(url: assetUrl) else { continue }
             let relativePath = LinkBuilder.getRelativePath(from: (url: baseUrl, mimeType: baseMimeType), to: (url: assetUrl, mimeType: possibleMimeType))
             outputCss = outputCss.replacingCharacters(in: group1Range, with: relativePath) as NSString
+            externalResourceUrls.insert(assetUrl)
         }
         return outputCss as String
     }

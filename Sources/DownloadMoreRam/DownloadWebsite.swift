@@ -14,6 +14,8 @@ struct DownloadWebsite: ParsableCommand {
     var websiteUrl: String
     @Argument(help: "The ouput folder to be created. Note that a root \"web\" folder will always be created at this location.")
     var outputPath: String
+    @Argument(help: "Enables printing of debug log messages.")
+    var debug: Bool?
     
     func validate() throws {
         guard let _ = URL(string: websiteUrl) else {
@@ -37,11 +39,25 @@ struct DownloadWebsite: ParsableCommand {
         print("-- Running Downloader --")
         print("Website Url: \(url.absoluteString)")
         print("Output Path: \(pathUrl.path)")
-        let downloader = Downloader()
+        
+        let downloader = Downloader()        
+        let isDebug = debug ?? false
+        downloader.logMessage = { message, level in
+            switch level {
+            case .debug:
+                if isDebug {
+                    print(message)
+                }
+            case .error, .info:
+                print(message)
+            }
+        }
+        
         var saveToPath = pathUrl
         if let host = url.host {
             saveToPath = pathUrl.appendingPathComponent(host, isDirectory: true)
         }
+        
         downloader.download(website: url, saveTo: saveToPath)
     }
 }

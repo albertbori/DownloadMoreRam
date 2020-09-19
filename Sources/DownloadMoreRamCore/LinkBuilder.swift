@@ -62,21 +62,7 @@ struct LinkBuilder {
         components.append(contentsOf: toDirectoryComponents.suffix(toDirectoryComponents.count - matchedDirectoryCount))
         components.append(toURL.lastPathComponent)
         
-        let relativePath = components.joined(separator: "/") + (to.url.query != nil ? "?\(to.url.query!)" : "")
+        let relativePath = components.joined(separator: "/") + (to.url.query != nil ? "?\(to.url.query!)" : "") + (to.url.fragment != nil ? "#\(to.url.fragment!)" : "")
         return relativePath
-    }
-}
-private extension MimeType {
-    var folderName: String {
-        switch self {
-        case .html:
-            return "pages"
-        case .css, .js:
-            return "scripts"
-        case .png, .gif, .tiff, .svg, .jpg:
-            return "images"
-        default:
-            return "resources"
-        }
     }
 }

@@ -80,3 +80,24 @@ enum HtmlConverterError: Error {
     case invalidData,
     badHtmlOutput
 }
+
+private extension MimeType {    
+    init?(element: Element) throws {
+        let cssQueryMap: [String: MimeType] = [
+            "a": .html,
+            "link[rel=stylesheet]": .css,
+            "link[rel=preload][as=style]": .css,
+            "link[rel=preload][as=fetch]": .json,
+            "link[rel=preload][as=image]": .png,
+            "link[rel=preload][as=script]": .js,
+            "script": .js,
+        ]
+        guard let key = try cssQueryMap.keys.first(where: { try element.iS($0) }) else {
+            return nil
+        }
+        guard let type = cssQueryMap[key] else {
+            return nil
+        }
+        self = type
+    }
+}
